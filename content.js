@@ -11,8 +11,9 @@
 
   function getChatContent() {
     const messages = document.querySelectorAll(".text-base");
+    const canvasMessages = document.querySelectorAll(".canmore-canvas");
 
-    if (messages.length === 0) {
+    if (messages.length === 0 && canvasMessages.length === 0) {
       console.warn("No chat messages found. The structure may have changed.");
       alert("No chat messages found! Try refreshing the page.");
       return null;
@@ -20,23 +21,28 @@
 
     let mdContent = "# ChatGPT Conversation\n\n";
 
-    messages.forEach(msg => {
-      const sender = msg.closest(".flex").querySelector("h3")?.innerText || "Unknown";
-      let text = msg.innerText.trim();
+    function extractMessages(msgElements) {
+      msgElements.forEach(msg => {
+        const sender = msg.closest(".flex")?.querySelector("h3")?.innerText || "Unknown";
+        let text = msg.innerText.trim();
 
-      // Detect code blocks
-      const codeBlocks = msg.querySelectorAll("pre");
-      if (codeBlocks.length > 0) {
-        codeBlocks.forEach(codeBlock => {
-          const codeContent = codeBlock.innerText.trim();
-          const langMatch = codeBlock.querySelector("code")?.className.match(/language-(\w+)/);
-          const lang = langMatch ? langMatch[1] : "";
-          text = text.replace(codeContent, `\n\`\`\`${lang}\n${codeContent}\n\`\`\`\n`);
-        });
-      }
+        // Detect code blocks
+        const codeBlocks = msg.querySelectorAll("pre");
+        if (codeBlocks.length > 0) {
+          codeBlocks.forEach(codeBlock => {
+            const codeContent = codeBlock.innerText.trim();
+            const langMatch = codeBlock.querySelector("code")?.className.match(/language-(\w+)/);
+            const lang = langMatch ? langMatch[1] : "";
+            text = text.replace(codeContent, `\n\`\`\`${lang}\n${codeContent}\n\`\`\`\n`);
+          });
+        }
 
-      mdContent += `## ${sender}\n\n${text}\n\n---\n\n`;
-    });
+        mdContent += `## ${sender}\n\n${text}\n\n---\n\n`;
+      });
+    }
+
+    extractMessages(messages);
+    extractMessages(canvasMessages);
 
     return mdContent;
   }
